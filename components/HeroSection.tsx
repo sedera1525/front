@@ -15,23 +15,19 @@ const HeroSection: React.FC = () => {
   useEffect(() => {
     const fetchSlides = async () => {
       try {
-        const response = await fetch('/api/slides');
-        if (!response.ok) {
-          const mockSlides: HeroSlide[] = [
-            { id: 1, bgImage: "url('https://picsum.photos/1600/900?image=1060')", badges: [{ text: "Editor Choice", color: "bg-yellow-400 text-black" }, { text: "Adventure Event", color: "bg-blue-500 text-white" }], title: "Announcing AdventureWeek at Okinawa", excerpt: "Join us for a week of unparalleled adventure, workshops, and exploration in the beautiful islands of Okinawa.", ctaText: "Read Story – 5 min read", pillTitle: "Okinawa Adventure" },
-            { id: 2, bgImage: "url('https://picsum.photos/1600/900?image=1043')", badges: [{ text: "New Destination", color: "bg-red-500 text-white" }], title: "Exploring the Untouched Scottish Highlands", excerpt: "Discover the raw beauty, ancient castles, and mystical lochs of one of the world's last great wildernesses.", ctaText: "Discover More – 8 min read", pillTitle: "Scottish Highlands" },
-            { id: 3, bgImage: "url('https://picsum.photos/1600/900?image=1057')", badges: [{ text: "Guides", color: "bg-indigo-500 text-white" }], title: "The Ultimate Guide to Rock Climbing", excerpt: "From beginner knots to advanced techniques, our comprehensive guide has everything you need to start your vertical journey.", ctaText: "Start Climbing – 6 min read", pillTitle: "Climbing Guide" },
-            { id: 4, bgImage: "url('https://picsum.photos/1600/900?image=203')", badges: [{ text: "Tourism", color: "bg-green-500 text-white" }], title: "Sustainable Tourism: Travel with a Purpose", excerpt: "Learn how you can make a positive impact on the environment and local communities while you travel.", ctaText: "Learn How – 4 min read", pillTitle: "Sustainable Travel" },
-            { id: 5, bgImage: "url('https://picsum.photos/1600/900?image=1075')", badges: [{ text: "Equipment", color: "bg-purple-500 text-white" }], title: "The Best Lightweight Tents for 2024", excerpt: "We've tested the top lightweight tents on the market to help you find the perfect shelter for your next backpacking trip.", ctaText: "See the Gear – 7 min read", pillTitle: "Backpacking Gear" },
-          ];
-          setSlides(mockSlides);
-          return;
-        }
+        const response = await fetch('https://91eb35f24335.ngrok-free.app/api/slides');
         const data: HeroSlide[] = await response.json();
         setSlides(data);
       } catch (err) {
-        setError('Failed to load slides. Please try again later.');
-        console.error(err);
+        console.error('Failed to load slides, using mock data.', err);
+        const mockSlides: HeroSlide[] = [
+          { id: 1, bgImage: "url('https://picsum.photos/1600/900?image=1060')", badges: [{ text: "Editor Choice", color: "bg-yellow-400 text-black" }, { text: "Adventure Event", color: "bg-blue-500 text-white" }], title: "Announcing AdventureWeek at Okinawa", excerpt: "Join us for a week of unparalleled adventure, workshops, and exploration in the beautiful islands of Okinawa.", ctaText: "Read Story – 5 min read", pillTitle: "Okinawa Adventure" },
+          { id: 2, bgImage: "url('https://picsum.photos/1600/900?image=1043')", badges: [{ text: "New Destination", color: "bg-red-500 text-white" }], title: "Exploring the Untouched Scottish Highlands", excerpt: "Discover the raw beauty, ancient castles, and mystical lochs of one of the world's last great wildernesses.", ctaText: "Discover More – 8 min read", pillTitle: "Scottish Highlands" },
+          { id: 3, bgImage: "url('https://picsum.photos/1600/900?image=1057')", badges: [{ text: "Guides", color: "bg-indigo-500 text-white" }], title: "The Ultimate Guide to Rock Climbing", excerpt: "From beginner knots to advanced techniques, our comprehensive guide has everything you need to start your vertical journey.", ctaText: "Start Climbing – 6 min read", pillTitle: "Climbing Guide" },
+          { id: 4, bgImage: "url('https://picsum.photos/1600/900?image=203')", badges: [{ text: "Tourism", color: "bg-green-500 text-white" }], title: "Sustainable Tourism: Travel with a Purpose", excerpt: "Learn how you can make a positive impact on the environment and local communities while you travel.", ctaText: "Learn How – 4 min read", pillTitle: "Sustainable Travel" },
+          { id: 5, bgImage: "url('https://picsum.photos/1600/900?image=1075')", badges: [{ text: "Equipment", color: "bg-purple-500 text-white" }], title: "The Best Lightweight Tents for 2024", excerpt: "We've tested the top lightweight tents on the market to help you find the perfect shelter for your next backpacking trip.", ctaText: "See the Gear – 7 min read", pillTitle: "Backpacking Gear" },
+        ];
+        setSlides(mockSlides);
       } finally {
         setLoading(false);
       }

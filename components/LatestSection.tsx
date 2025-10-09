@@ -16,7 +16,7 @@ const LatestSection: React.FC<LatestSectionProps> = ({ onStoryClick, onCategoryC
   useEffect(() => {
     const fetchLatest = async () => {
       try {
-        const response = await fetch('/api/stories/latest');
+        const response = await fetch('https://91eb35f24335.ngrok-free.app/api/articles');
         if (!response.ok) {
           const mockLatest: Story[] = [
             { id: 5, title: "The Best Lightweight Tents for 2024", imageUrl: "https://picsum.photos/seed/tent/600/400", category: "Equipment", categoryColor: "bg-purple-500", author: { name: "Mike Chan" }, date: "October 21, 2024", readTime: "7 min", excerpt: "We've tested the top lightweight tents on the market to help you find the perfect shelter." },
@@ -28,6 +28,7 @@ const LatestSection: React.FC<LatestSectionProps> = ({ onStoryClick, onCategoryC
           return;
         }
         const data: Story[] = await response.json();
+        console.log(data);
         setArticles(data);
       } catch (err) {
         setError('Failed to load latest articles.');

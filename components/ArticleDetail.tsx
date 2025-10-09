@@ -14,7 +14,7 @@ const ArticleDetail: React.FC<ArticleDetailProps> = ({ articleId }) => {
     setLoading(true);
     const fetchArticle = async () => {
       try {
-        const response = await fetch(`/api/articles/${articleId}`);
+        const response = await fetch(`https://91eb35f24335.ngrok-free.app/api/articles/${articleId}`);
         if (!response.ok) {
           // Mock data for demonstration
           const mockArticle: Article = {

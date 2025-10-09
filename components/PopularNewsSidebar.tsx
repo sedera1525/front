@@ -13,8 +13,8 @@ const PopularNewsSidebar: React.FC<PopularNewsSidebarProps> = ({ onStoryClick })
   useEffect(() => {
     const fetchTrendingStories = async () => {
       try {
-        const response = await fetch('/api/stories/trending');
-        if (!response.ok) {
+        const response = await fetch('https://91eb35f24335.ngrok-free.app/api/stories/trending');
+        if (response.ok) {
           const mockTrending: TrendingStory[] = [
             { id: 1, title: "Driverless cars need to make their passengers feel like drivers", imageUrl: "https://picsum.photos/seed/car/100/100", date: "December 13, 2024", comments: 5 },
             { id: 2, title: "One of the best phones around: Sony's Xperia Z3 reviewed", imageUrl: "https://picsum.photos/seed/phone/100/100", date: "December 13, 2024", comments: 8 },

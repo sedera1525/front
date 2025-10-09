@@ -9,8 +9,8 @@ const PresidentMessage: React.FC = () => {
   useEffect(() => {
     const fetchMessage = async () => {
       try {
-        const response = await fetch('/api/president-message');
-        if (!response.ok) {
+        const response = await fetch('https://91eb35f24335.ngrok-free.app/api/president-message');
+        if (response.ok) {
            const mockData: President = {
             name: 'Alexandre Moreau',
             title: 'Président & Fondateur, Adventure Today',

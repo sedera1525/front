@@ -17,7 +17,7 @@ const CategoryPage: React.FC<CategoryPageProps> = ({ category, onStoryClick, onC
     setLoading(true);
     const fetchArticles = async () => {
       try {
-        const response = await fetch(`/api/articles?category=${encodeURIComponent(category)}`);
+        const response = await fetch(`https://91eb35f24335.ngrok-free.app/api/articles?category=${encodeURIComponent(category)}`);
         if (!response.ok) {
            const mockArticles: Story[] = [
              // Destination

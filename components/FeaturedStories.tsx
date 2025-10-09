@@ -14,8 +14,8 @@ const FeaturedStories: React.FC<FeaturedCategoriesProps> = ({ onCategoryClick })
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await fetch('/api/categories/featured');
-        if (!response.ok) {
+        const response = await fetch('https://91eb35f24335.ngrok-free.app/api/categories-featured');
+        if (response.ok) {
           const mockCategories: Category[] = [
             { name: "Adventure Event", imageUrl: "https://picsum.photos/seed/event/600/400", description: "Join our thrilling events and challenges across the globe." },
             { name: "Destination", imageUrl: "https://picsum.photos/seed/destination/600/400", description: "Discover breathtaking new places and hidden gems." },

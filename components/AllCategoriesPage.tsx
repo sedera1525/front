@@ -14,7 +14,7 @@ const AllCategoriesPage: React.FC<AllCategoriesPageProps> = ({ onCategoryClick }
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await fetch('/api/categories');
+        const response = await fetch('https://91eb35f24335.ngrok-free.app/api/categories');
         if (!response.ok) {
           const mockCategories: Category[] = [
             { name: "Adventure Event", imageUrl: "https://picsum.photos/seed/event/600/400", description: "Join our thrilling events and challenges across the globe." },

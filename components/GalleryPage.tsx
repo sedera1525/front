@@ -16,8 +16,8 @@ const GalleryPage: React.FC = () => {
   useEffect(() => {
     const fetchImages = async () => {
       try {
-        const response = await fetch('/api/gallery');
-        if (!response.ok) {
+        const response = await fetch('https://91eb35f24335.ngrok-free.app/api/gallery');
+        if (response.ok) {
           const mockImages: GalleryImage[] = [
             { id: 1, imageUrl: `https://picsum.photos/seed/gallery1/800/600`, title: `Mountain Vista`, category: 'Landscapes' },
             { id: 2, imageUrl: `https://picsum.photos/seed/gallery2/800/600`, title: `Kayaker on Lake`, category: 'People' },
