@@ -1,56 +1,215 @@
 import React, { useState, useEffect } from 'react';
 import type { Article } from '../types';
+import slugify from '../utils/slugify';
 
 interface ArticleDetailProps {
-  articleId: number;
+  slug: string;
+  initialArticleId?: number;
 }
 
-const ArticleDetail: React.FC<ArticleDetailProps> = ({ articleId }) => {
+const API_BASE_URL = 'https://91eb35f24335.ngrok-free.app';
+const ARTICLE_ENDPOINT = (id: number) => `${API_BASE_URL}/api/article/${id}`;
+const ARTICLES_ENDPOINT = `${API_BASE_URL}/api/articles`;
+const DEFAULT_IMAGE = 'https://picsum.photos/1200/600?image=1043';
+const DEFAULT_AUTHOR_AVATAR = 'https://picsum.photos/seed/fjkm-author/100/100';
+
+type ApiArticlePayload = {
+  data?: {
+    id?: number;
+    title?: string | null;
+    slug?: string | null;
+    imageUrl?: string | null;
+    category?: string | null;
+    categoryColor?: string | null;
+    date?: string | null;
+    excerpt?: string | null;
+    content?: string | null;
+    author?: {
+      name?: string | null;
+      avatarUrl?: string | null;
+    } | null;
+    readTime?: string | null;
+  } | null;
+};
+
+const normalizeMediaUrl = (raw?: string | null, fallback: string = DEFAULT_IMAGE): string => {
+  const value = raw?.trim();
+  if (!value) {
+    return fallback;
+  }
+
+  if (/^https?:\/\//i.test(value)) {
+    try {
+      const parsed = new URL(value);
+      const base = new URL(API_BASE_URL);
+
+      if (parsed.hostname === 'localhost') {
+        parsed.protocol = base.protocol;
+        parsed.hostname = base.hostname;
+        parsed.port = base.port;
+      }
+
+      if (!parsed.pathname.startsWith('/storage/')) {
+        parsed.pathname = `/storage/${parsed.pathname.replace(/^\/+/, '')}`;
+      }
+
+      parsed.searchParams.set('ngrok-skip-browser-warning', '1');
+
+      return parsed.toString();
+    } catch (error) {
+      console.error('Failed to normalize media URL', error);
+      return fallback;
+    }
+  }
+
+  const cleaned = value.replace(/^\/+/, '');
+  const prefixed = cleaned.startsWith('storage/') ? cleaned : `storage/${cleaned}`;
+  return `${API_BASE_URL}/${prefixed}?ngrok-skip-browser-warning=1`;
+};
+
+const toArticle = (payload: unknown, requestedId: number, fallbackSlug: string): Article => {
+  if (payload === null || typeof payload !== 'object') {
+    throw new Error('Invalid article payload.');
+  }
+
+  const { data } = payload as ApiArticlePayload;
+  if (!data) {
+    throw new Error('Missing article data.');
+  }
+
+  const id = data.id ?? requestedId;
+  const title = data.title?.trim() || 'Article sans titre';
+  const slug = data.slug?.trim() ? slugify(data.slug) : slugify(title) || fallbackSlug;
+  const category = data.category?.trim() || 'Actualités';
+  const categoryColor = data.categoryColor?.trim() || 'bg-gray-500';
+  const readTime = data.readTime?.trim() || undefined;
+  const excerpt = data.excerpt?.trim() || undefined;
+  const rawContent = data.content ?? '';
+  const contentHtml = rawContent.trim().length
+    ? rawContent
+    : excerpt
+      ? `<p>${excerpt.replace(/\r?\n{2,}/g, '</p><p>').replace(/\r?\n/g, '<br />')}</p>`
+      : '<p>Aucun contenu disponible pour cet article pour le moment.</p>';
+
+  const authorName = data.author?.name?.trim() || 'Équipe FJKM Anosivavaka';
+  const authorAvatar = normalizeMediaUrl(data.author?.avatarUrl, DEFAULT_AUTHOR_AVATAR);
+
+  return {
+    id,
+    title,
+    imageUrl: normalizeMediaUrl(data.imageUrl, DEFAULT_IMAGE),
+    category,
+    categoryColor,
+    author: {
+      name: authorName,
+      avatarUrl: authorAvatar,
+    },
+    date: data.date?.trim() || undefined,
+    readTime,
+    excerpt,
+    content: contentHtml,
+    slug,
+  };
+};
+
+const DEFAULT_ARTICLE: Article = {
+  id: 0,
+  title: 'Discovering the Hidden Gems of the Scottish Highlands',
+  slug: slugify('Discovering the Hidden Gems of the Scottish Highlands'),
+  imageUrl: DEFAULT_IMAGE,
+  category: 'Destination',
+  categoryColor: 'bg-red-500',
+  author: { name: 'Jane Cooper', avatarUrl: DEFAULT_AUTHOR_AVATAR },
+  date: 'October 26, 2024',
+  readTime: '8 min',
+  excerpt:
+    'The Scottish Highlands are a rugged, mountainous region of Scotland, known for their stunning landscapes, historic castles, and rich cultural heritage.',
+  content: `
+    <p>The Scottish Highlands are a rugged, mountainous region of Scotland, known for their stunning landscapes, historic castles, and rich cultural heritage. This sparsely populated area is a paradise for outdoor enthusiasts, offering everything from hiking and climbing to kayaking and wildlife watching.</p>
+    <p class="my-4">Our journey began in Inverness, the cultural capital of the Highlands. From there, we ventured west, towards the iconic Loch Ness. While we didn't spot the legendary monster, the sheer beauty of the loch, surrounded by rolling hills and ancient forests, was a sight to behold.</p>
+    <blockquote class="border-l-4 border-blue-500 pl-4 my-6 italic text-gray-600">
+      "The Highlands are not just a place, but a feeling. A sense of wildness, freedom, and timelessness that stays with you long after you've left."
+    </blockquote>
+  `,
+};
+
+const ArticleDetail: React.FC<ArticleDetailProps> = ({ slug, initialArticleId }) => {
   const [article, setArticle] = useState<Article | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setLoading(true);
     const fetchArticle = async () => {
+      setLoading(true);
+      setError(null);
       try {
-        const response = await fetch(`https://91eb35f24335.ngrok-free.app/api/articles/${articleId}`);
-        if (!response.ok) {
-          // Mock data for demonstration
-          const mockArticle: Article = {
-            id: articleId,
-            title: "Discovering the Hidden Gems of the Scottish Highlands",
-            imageUrl: "https://picsum.photos/1200/600?image=1043",
-            category: "Destination",
-            categoryColor: "bg-red-500",
-            author: { name: "Jane Cooper", avatarUrl: "https://picsum.photos/seed/jane/100/100" },
-            date: "October 26, 2024",
-            content: `
-              <p>The Scottish Highlands are a rugged, mountainous region of Scotland, known for their stunning landscapes, historic castles, and rich cultural heritage. This sparsely populated area is a paradise for outdoor enthusiasts, offering everything from hiking and climbing to kayaking and wildlife watching.</p>
-              <p class="my-4">Our journey began in Inverness, the cultural capital of the Highlands. From there, we ventured west, towards the iconic Loch Ness. While we didn't spot the legendary monster, the sheer beauty of the loch, surrounded by rolling hills and ancient forests, was a sight to behold. The ruins of Urquhart Castle, perched on the loch's edge, offered a glimpse into Scotland's turbulent past.</p>
-              <h3 class="text-2xl font-bold my-4 text-gray-800">The Isle of Skye</h3>
-              <p>No trip to the Highlands is complete without a visit to the Isle of Skye. Connected to the mainland by a bridge, Skye is famous for its dramatic landscapes, including the Old Man of Storr, the Quiraing, and the Fairy Pools. We spent two days hiking on the island, and every trail offered breathtaking views that seemed to be straight out of a fantasy novel.</p>
-              <p class="my-4">The weather in the Highlands can be unpredictable, with sunshine, rain, and wind often occurring within the same day. However, this ever-changing weather only adds to the region's mystical charm, creating dramatic lighting and stunning rainbows.</p>
-              <blockquote class="border-l-4 border-blue-500 pl-4 my-6 italic text-gray-600">
-                "The Highlands are not just a place, but a feeling. A sense of wildness, freedom, and timelessness that stays with you long after you've left."
-              </blockquote>
-              <p>Whether you're an avid hiker, a history buff, or simply someone looking to escape the hustle and bustle of city life, the Scottish Highlands offer an unforgettable adventure. It's a place where nature reigns supreme, and every corner reveals a new, breathtaking vista.</p>
-            `,
-          };
-          setArticle(mockArticle);
-          return;
+        let resolvedId = initialArticleId ?? null;
+
+        if (!resolvedId) {
+          const listResponse = await fetch(ARTICLES_ENDPOINT, {
+            headers: {
+              Accept: 'application/json',
+              'ngrok-skip-browser-warning': '1',
+            },
+          });
+
+          if (!listResponse.ok) {
+            throw new Error(`Unexpected status ${listResponse.status} while resolving slug`);
+          }
+
+          const listPayload = await listResponse.json();
+          if (!Array.isArray(listPayload)) {
+            throw new Error('Invalid article collection response.');
+          }
+
+          const fallbackSlug = slugify(slug);
+          const matched = listPayload
+            .map((item) => {
+              const rawId = (item as { id?: number | string }).id;
+              const numericId = typeof rawId === 'number' ? rawId : Number(rawId);
+              return {
+                id: Number.isFinite(numericId) ? numericId : null,
+                title: typeof (item as { title?: string }).title === 'string' ? (item as { title?: string }).title as string : '',
+              };
+            })
+            .find((item) => item.id !== null && slugify(item.title) === fallbackSlug);
+
+          if (!matched || matched.id === null) {
+            throw new Error(`Article introuvable pour le slug "${slug}".`);
+          }
+
+          resolvedId = matched.id;
         }
-        const data: Article = await response.json();
-        setArticle(data);
+
+        if (!resolvedId) {
+          throw new Error(`Impossible de déterminer l'article pour le slug "${slug}".`);
+        }
+
+        const response = await fetch(ARTICLE_ENDPOINT(resolvedId), {
+          headers: {
+            Accept: 'application/json',
+            'ngrok-skip-browser-warning': '1',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Unexpected status ${response.status}`);
+        }
+
+        const payload = await response.json();
+        const normalized = toArticle(payload, resolvedId, slugify(slug));
+        setArticle(normalized);
       } catch (err) {
-        setError(`Failed to load article (ID: ${articleId}).`);
         console.error(err);
+        setError(`Impossible de charger l'article (${slug}).`);
+        setArticle({ ...DEFAULT_ARTICLE, id: initialArticleId ?? 0, slug: slugify(slug) });
       } finally {
         setLoading(false);
       }
     };
+
     fetchArticle();
-  }, [articleId]);
+  }, [slug, initialArticleId]);
 
   if (loading) return <div className="p-4 text-center bg-white rounded-lg shadow-md">Loading article...</div>;
   if (error) return <div className="p-4 text-center text-red-600 bg-white rounded-lg shadow-md">{error}</div>;
@@ -63,7 +222,7 @@ const ArticleDetail: React.FC<ArticleDetailProps> = ({ articleId }) => {
       </span>
       <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 leading-tight mb-4">{article.title}</h1>
       <div className="flex items-center space-x-4 mb-6 border-b border-t border-gray-200 py-4">
-        <img src={article.author.avatarUrl} alt={article.author.name} className="w-12 h-12 rounded-full" />
+        <img src={article.author.avatarUrl} alt={article.author.name} className="w-12 h-12 rounded-full object-cover" />
         <div>
           <p className="font-semibold text-gray-800">{article.author.name}</p>
           <p className="text-sm text-gray-500">{article.date}</p>

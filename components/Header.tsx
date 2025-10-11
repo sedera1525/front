@@ -35,7 +35,7 @@ const Header: React.FC<HeaderProps> = ({ onNavClick }) => {
             <svg className="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
             </svg>
-            <span className={`text-2xl font-bold ${textColorClass}`}>Adventure Today</span>
+            <span className={`text-2xl font-bold ${textColorClass}`}>FJKM Anosivavaka </span>
           </button>
 
           <nav className="hidden md:flex items-center space-x-8">

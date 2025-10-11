@@ -1,10 +1,12 @@
 import React, { useRef, useEffect, useState } from 'react';
-import type { Story } from '../types';
+import { Link } from 'react-router-dom';
+import type { Story, StoryNavigationTarget } from '../types';
 import { ClockIcon } from './icons/ClockIcon';
+import slugify from '../utils/slugify';
 
 interface LazyArticleCardProps {
   article: Story;
-  onStoryClick: (id: number) => void;
+  onStoryClick: (target: StoryNavigationTarget) => void;
   onCategoryClick: (category: string) => void;
 }
 
@@ -39,6 +41,9 @@ const LazyArticleCard: React.FC<LazyArticleCardProps> = ({ article, onStoryClick
     };
   }, []);
 
+  const slug = article.slug ?? slugify(`${article.title}-${article.id}`);
+  const handleNavigate = () => onStoryClick({ id: article.id, slug });
+
   return (
     <div
       ref={cardRef}
@@ -49,13 +54,13 @@ const LazyArticleCard: React.FC<LazyArticleCardProps> = ({ article, onStoryClick
       {isVisible && (
         <>
             <div className="relative">
-                <button onClick={() => onStoryClick(article.id)} className="block w-full">
-                    <img
-                        src={article.imageUrl}
-                        alt={article.title}
-                        className="w-full h-48 object-cover group-hover:opacity-80 transition-opacity"
-                    />
-                </button>
+                <Link to={`/article/${slug}`} onClick={handleNavigate} className="block w-full">
+                  <img
+                    src={article.imageUrl}
+                    alt={article.title}
+                    className="w-full h-48 object-cover group-hover:opacity-80 transition-opacity"
+                  />
+                </Link>
                 <button
                     onClick={() => onCategoryClick(article.category)}
                     className={`absolute top-4 left-4 text-white text-xs font-bold px-3 py-1 rounded-full ${article.categoryColor} hover:opacity-90 transition-opacity`}
@@ -65,9 +70,9 @@ const LazyArticleCard: React.FC<LazyArticleCardProps> = ({ article, onStoryClick
             </div>
             <div className="p-6 flex flex-col flex-grow">
                 <h3 className="text-lg font-bold text-gray-800 mb-2 leading-tight">
-                    <a href="#" onClick={(e) => { e.preventDefault(); onStoryClick(article.id); }} className="hover:text-blue-600 transition-colors">
-                        {article.title}
-                    </a>
+                    <Link to={`/article/${slug}`} onClick={handleNavigate} className="hover:text-blue-600 transition-colors">
+                      {article.title}
+                    </Link>
                 </h3>
                 {article.excerpt && <p className="text-gray-600 text-sm flex-grow mb-4">{article.excerpt}</p>}
                 <div className="mt-auto pt-4 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">

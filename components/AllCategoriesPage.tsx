@@ -17,14 +17,14 @@ const AllCategoriesPage: React.FC<AllCategoriesPageProps> = ({ onCategoryClick }
         const response = await fetch('https://91eb35f24335.ngrok-free.app/api/categories');
         if (!response.ok) {
           const mockCategories: Category[] = [
-            { name: "Adventure Event", imageUrl: "https://picsum.photos/seed/event/600/400", description: "Join our thrilling events and challenges across the globe." },
+            { name: "FJKM Anosivavaka", imageUrl: "https://picsum.photos/seed/event/600/400", description: "Join our thrilling events and challenges across the globe." },
             { name: "Destination", imageUrl: "https://picsum.photos/seed/destination/600/400", description: "Discover breathtaking new places and hidden gems." },
             { name: "Guides", imageUrl: "https://picsum.photos/seed/guides/600/400", description: "Expert tips and comprehensive guides for your next trip." },
-            { name: "Equipment", imageUrl: "https://picsum.photos/seed/equipment/600/400", description: "Reviews and recommendations on the best gear for your adventures." },
+            { name: "Equipment", imageUrl: "https://picsum.photos/seed/equipment/600/400", description: "Reviews and recommendations on the best gear for your FJKM Anosivavaka." },
             { name: "Food & Travel", imageUrl: "https://picsum.photos/seed/food/600/400", description: "Explore global cuisines and culinary journeys." },
-            { name: "People", imageUrl: "https://picsum.photos/seed/people/600/400", description: "Inspiring stories from adventurers around the world." },
+            { name: "People", imageUrl: "https://picsum.photos/seed/people/600/400", description: "Inspiring stories from FJKM Anosivavaka around the world." },
             { name: "Wildlife", imageUrl: "https://picsum.photos/seed/wildlife/600/400", description: "Encounters with the world's most fascinating creatures." },
-            { name: "Gear", imageUrl: "https://picsum.photos/seed/gear2/600/400", description: "In-depth reviews and guides on the latest adventure gear." },
+            { name: "Gear", imageUrl: "https://picsum.photos/seed/gear2/600/400", description: "In-depth reviews and guides on the latest FJKM Anosivavaka." },
           ];
           setCategories(mockCategories);
           return;
@@ -49,7 +49,7 @@ const AllCategoriesPage: React.FC<AllCategoriesPageProps> = ({ onCategoryClick }
                 All Categories
             </h1>
             <p className="mt-4 max-w-2xl mx-auto text-lg text-gray-600">
-                Dive into your next adventure by exploring our wide range of topics and stories.
+                Dive into your next FJKM Anosivavaka by exploring our wide range of topics and stories.
             </p>
         </div>
 

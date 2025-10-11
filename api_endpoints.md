@@ -1,6 +1,6 @@
-# Adventure Today - API Endpoints
+# FJKM Anosivavaka  - API Endpoints
 
-This document outlines the REST API endpoints required to power the Adventure Today magazine website.
+This document outlines the REST API endpoints required to power the FJKM Anosivavaka  magazine website.
 
 ## 1. Slides
 
@@ -16,12 +16,12 @@ This document outlines the REST API endpoints required to power the Adventure To
         "bgImage": "https://picsum.photos/1600/900?image=1060",
         "badges": [
           { "text": "Editor Choice", "color": "bg-yellow-400 text-black" },
-          { "text": "Adventure Event", "color": "bg-blue-500 text-white" }
+          { "text": "FJKM Anosivavaka Event", "color": "bg-blue-500 text-white" }
         ],
-        "title": "Announcing AdventureWeek at Okinawa",
-        "excerpt": "Join us for a week of unparalleled adventure, workshops, and exploration in the beautiful islands of Okinawa.",
+        "title": "Announcing FJKM AnosivavakaWeek",
+        "excerpt": "Join us for a week of unparalleled FJKM Anosivavaka, workshops, and exploration in the beautiful islands of Okinawa.",
         "ctaText": "Read Story – 5 min read",
-        "pillTitle": "Okinawa Adventure"
+        "pillTitle": "Okinawa FJKM Anosivavaka"
       }
     ]
     ```
@@ -148,9 +148,9 @@ This document outlines the REST API endpoints required to power the Adventure To
     ```json
     {
       "name": "Alexandre Moreau",
-      "title": "Président & Fondateur, Adventure Today",
+      "title": "Président & Fondateur, FJKM Anosivavaka ",
       "quote": "\"L'aventure, ce n'est pas seulement les destinations que nous atteignons...\"",
-      "message": "Ici, à Adventure Today, notre mission est de vous inciter à sortir de votre zone de confort...",
+      "message": "Ici, à FJKM Anosivavaka , notre mission est de vous inciter à sortir de votre zone de confort...",
       "imageUrl": "https://picsum.photos/seed/president/600/700"
     }
     ```

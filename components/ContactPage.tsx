@@ -23,7 +23,7 @@ const ContactPage: React.FC = () => {
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-800 text-lg">Adresse</h3>
-                  <p className="text-gray-600">123 Adventure Lane, Explore City, World</p>
+                  <p className="text-gray-600">123 FJKM Anosivavaka Lane, Explore City, World</p>
                 </div>
               </div>
               <div className="flex items-start space-x-4">
@@ -41,7 +41,7 @@ const ContactPage: React.FC = () => {
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-800 text-lg">Email</h3>
-                  <p className="text-gray-600">contact@adventuretoday.com</p>
+                  <p className="text-gray-600">contact@FJKM Anosivavaka.com</p>
                 </div>
               </div>
             </div>

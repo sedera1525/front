@@ -3,6 +3,7 @@
 export interface Story {
   id: number;
   title: string;
+  slug?: string;
   imageUrl: string;
   category: string;
   categoryColor: string;
@@ -15,12 +16,19 @@ export interface Story {
   readTime?: string;
 }
 
+export interface StoryNavigationTarget {
+  id: number;
+  slug: string;
+}
+
 export interface TrendingStory {
   id: number;
   title: string;
+  slug?: string;
   imageUrl: string;
   date: string;
   comments: number;
+  excerpt?: string;
 }
 
 export interface HeroSlide {
