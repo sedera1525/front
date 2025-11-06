@@ -3,12 +3,15 @@ import { Link } from 'react-router-dom';
 import type { Story, StoryNavigationTarget } from '../types';
 import { ClockIcon } from './icons/ClockIcon';
 import slugify from '../utils/slugify';
+import { encodeFallbacks, shiftFallback } from '../utils/mediaUrl';
 
 interface LazyArticleCardProps {
   article: Story;
   onStoryClick: (target: StoryNavigationTarget) => void;
   onCategoryClick: (category: string) => void;
 }
+
+const FALLBACK_IMAGE = 'https://picsum.photos/seed/fjkm-lazy-card/600/400';
 
 const LazyArticleCard: React.FC<LazyArticleCardProps> = ({ article, onStoryClick, onCategoryClick }) => {
   const [isVisible, setIsVisible] = useState(false);
@@ -58,7 +61,21 @@ const LazyArticleCard: React.FC<LazyArticleCardProps> = ({ article, onStoryClick
                   <img
                     src={article.imageUrl}
                     alt={article.title}
+                    data-fallbacks={
+                      article.imageFallbacks && article.imageFallbacks.length > 0
+                        ? encodeFallbacks(article.imageFallbacks)
+                        : undefined
+                    }
                     className="w-full h-48 object-cover group-hover:opacity-80 transition-opacity"
+                    onError={(event) => {
+                      const nextSrc = shiftFallback(event.currentTarget);
+                      if (nextSrc) {
+                        event.currentTarget.src = nextSrc;
+                      } else {
+                        event.currentTarget.onerror = null;
+                        event.currentTarget.src = FALLBACK_IMAGE;
+                      }
+                    }}
                   />
                 </Link>
                 <button
@@ -77,7 +94,7 @@ const LazyArticleCard: React.FC<LazyArticleCardProps> = ({ article, onStoryClick
                 {article.excerpt && <p className="text-gray-600 text-sm flex-grow mb-4">{article.excerpt}</p>}
                 <div className="mt-auto pt-4 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
                     {article.author && (
-                        <p>By <span className="font-semibold text-gray-700">{article.author.name}</span></p>
+                        <p>Par <span className="font-semibold text-gray-700">{article.author.name}</span></p>
                     )}
                     {article.readTime && (
                         <div className="flex items-center space-x-1">

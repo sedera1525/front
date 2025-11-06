@@ -3,12 +3,15 @@ import { Link } from 'react-router-dom';
 import type { Story, StoryNavigationTarget } from '../types';
 import { ClockIcon } from './icons/ClockIcon';
 import slugify from '../utils/slugify';
+import { encodeFallbacks, shiftFallback } from '../utils/mediaUrl';
 
 interface StoryCardProps {
   story: Story;
   onStoryClick: (target: StoryNavigationTarget) => void;
   onCategoryClick: (category: string) => void;
 }
+
+const FALLBACK_IMAGE = 'https://picsum.photos/seed/fjkm-story/600/400';
 
 const StoryCard: React.FC<StoryCardProps> = ({ story, onStoryClick, onCategoryClick }) => {
   const slug = story.slug ?? slugify(`${story.title}-${story.id}`);
@@ -21,7 +24,21 @@ const StoryCard: React.FC<StoryCardProps> = ({ story, onStoryClick, onCategoryCl
           <img 
             src={story.imageUrl} 
             alt={story.title}
+            data-fallbacks={
+              story.imageFallbacks && story.imageFallbacks.length > 0
+                ? encodeFallbacks(story.imageFallbacks)
+                : undefined
+            }
             className="w-full h-48 object-cover group-hover:opacity-80 transition-opacity"
+            onError={(event) => {
+              const nextSrc = shiftFallback(event.currentTarget);
+              if (nextSrc) {
+                event.currentTarget.src = nextSrc;
+              } else {
+                event.currentTarget.onerror = null;
+                event.currentTarget.src = FALLBACK_IMAGE;
+              }
+            }}
           />
         </Link>
         <button 
@@ -40,7 +57,7 @@ const StoryCard: React.FC<StoryCardProps> = ({ story, onStoryClick, onCategoryCl
         <p className="text-gray-600 text-sm flex-grow">{story.excerpt}</p>
         <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
            {story.author && (
-            <p>By <span className="font-semibold text-gray-700">{story.author.name}</span></p>
+            <p>Par <span className="font-semibold text-gray-700">{story.author.name}</span></p>
            )}
            {story.readTime && (
             <div className="flex items-center space-x-1">

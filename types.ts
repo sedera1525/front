@@ -45,6 +45,7 @@ export interface HeroSlide {
   excerpt: string;
   ctaText: string;
   pillTitle: string;
+  ctaUrl?: string;
 }
 
 export interface President {
@@ -72,6 +73,7 @@ export interface GalleryImage {
   imageFallbacks?: string[];
   title: string;
   category: string;
+  caption?: string | null;
 }
 
 export interface Category {
@@ -79,4 +81,22 @@ export interface Category {
   imageUrl: string;
   imageFallbacks?: string[];
   description: string;
+}
+
+export interface VideoItem {
+  id: string;
+  title: string;
+  thumbnailUrl: string;
+  thumbnailFallbacks?: string[];
+  channelName: string;
+  views: number;
+  publishedAt: string;
+  duration?: string | null;
+  tags?: string[];
+  description?: string;
+  videoUrl: string;
+  embedUrl: string;
+  streamUrl?: string | null;
+  streamType?: string | null;
+  platform?: 'youtube' | 'other';
 }

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { MenuIcon } from './icons/MenuIcon';
 import { XIcon } from './icons/XIcon';
 
-type Page = 'home' | 'gallery' | 'contact';
+type Page = 'home' | 'gallery' | 'videos' | 'contact';
 
 interface HeaderProps {
   onNavClick: (page: Page) => void;
@@ -12,8 +12,9 @@ const Header: React.FC<HeaderProps> = ({ onNavClick }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const navLinks: { name: string; page: Page }[] = [
-    { name: 'Home', page: 'home' },
-    { name: 'Gallery', page: 'gallery' },
+    { name: 'Accueil', page: 'home' },
+    { name: 'Galerie', page: 'gallery' },
+    { name: 'Vidéos', page: 'videos' },
     { name: 'Contact', page: 'contact' },
   ];
 
@@ -51,7 +52,7 @@ const Header: React.FC<HeaderProps> = ({ onNavClick }) => {
           </nav>
 
           <div className={`md:hidden ${textColorClass}`}>
-            <button onClick={() => setIsOpen(!isOpen)} aria-label="Toggle menu" className="focus:outline-none">
+            <button onClick={() => setIsOpen(!isOpen)} aria-label="Afficher ou masquer le menu" className="focus:outline-none">
               {isOpen ? <XIcon /> : <MenuIcon />}
             </button>
           </div>

@@ -1,10 +1,42 @@
 import React, { useState, useEffect } from 'react';
 import type { Category } from '../types';
-import CategoryCard from './CategoryCard';
+import { API_BASE_URL } from '../utils/apiConfig';
+import { encodeFallbacks, normalizeMediaValue, shiftFallback } from '../utils/mediaUrl';
 
 interface FeaturedCategoriesProps {
   onCategoryClick: (category: string) => void;
 }
+
+const CATEGORIES_ENDPOINT = `${API_BASE_URL}/api/categories`;
+const DEFAULT_IMAGE = 'https://picsum.photos/seed/fjkm-featured/600/400';
+
+type ApiCategory = {
+  id: number;
+  name: string;
+  imageUrl?: string | null;
+  description?: string | null;
+};
+
+const normalizeCategories = (payload: unknown): Category[] => {
+  if (!Array.isArray(payload)) {
+    throw new Error('Réponse de catégories invalide');
+  }
+
+  return payload.map((item) => {
+    const category = item as ApiCategory;
+    const rawImagePath = category.imageUrl?.trim() ?? '';
+    const { primary, fallbacks } = normalizeMediaValue(rawImagePath, {
+      fallback: DEFAULT_IMAGE,
+    });
+
+    return {
+      name: category.name,
+      imageUrl: primary,
+      imageFallbacks: fallbacks,
+      description: category.description ?? `Découvrez la catégorie ${category.name}`,
+    };
+  });
+};
 
 const FeaturedStories: React.FC<FeaturedCategoriesProps> = ({ onCategoryClick }) => {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -14,26 +46,29 @@ const FeaturedStories: React.FC<FeaturedCategoriesProps> = ({ onCategoryClick })
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await fetch('https://91eb35f24335.ngrok-free.app/api/categories-featured');
-        if (response.ok) {
-          const mockCategories: Category[] = [
-            { name: "FJKM Anosivavaka Event", imageUrl: "https://picsum.photos/seed/event/600/400", description: "Join our thrilling events and challenges across the globe." },
-            { name: "Destination", imageUrl: "https://picsum.photos/seed/destination/600/400", description: "Discover breathtaking new places and hidden gems." },
-            { name: "Guides", imageUrl: "https://picsum.photos/seed/guides/600/400", description: "Expert tips and comprehensive guides for your next trip." },
-            { name: "Equipment", imageUrl: "https://picsum.photos/seed/equipment/600/400", description: "Reviews and recommendations on the best gear for your FJKM Anosivavakas." },
-          ];
-          setCategories(mockCategories);
-          return;
+        const response = await fetch(CATEGORIES_ENDPOINT, {
+          headers: {
+            Accept: 'application/json',
+            'ngrok-skip-browser-warning': '1',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Statut inattendu ${response.status}`);
         }
-        const data: Category[] = await response.json();
-        setCategories(data);
+
+        const rawPayload = await response.json();
+        const normalized = normalizeCategories(rawPayload);
+        setCategories(normalized);
+        setError(null);
       } catch (err) {
-        setError("Failed to load categories.");
         console.error(err);
+        setError('Impossible de charger les catégories.');
       } finally {
         setLoading(false);
       }
     };
+
     fetchCategories();
   }, []);
 
@@ -43,16 +78,43 @@ const FeaturedStories: React.FC<FeaturedCategoriesProps> = ({ onCategoryClick })
         <h2 className="text-3xl sm:text-4xl font-bold text-start text-gray-800 mb-12">
           FJKM Anosivavaka
         </h2>
-        {loading && <div className="text-center"><p>Loading categories...</p></div>}
-        {error && <div className="text-center text-red-600"><p>{error}</p></div>}
-        {!loading && !error && (
+
+        {loading && <p className="text-center">Chargement des catégories...</p>}
+        {error && <p className="text-center text-red-600">{error}</p>}
+
+        {!loading && categories.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {categories.map(category => (
-              <CategoryCard 
-                key={category.name} 
-                category={category} 
-                onCategoryClick={onCategoryClick}
-              />
+            {categories.map((category) => (
+              <div
+                key={category.name}
+                onClick={() => onCategoryClick(category.name)}
+                className="cursor-pointer"
+              >
+                <div className="bg-white shadow rounded-lg overflow-hidden hover:shadow-lg transition">
+                  <img
+                    src={category.imageUrl}
+                    alt={category.name}
+                    data-fallbacks={
+                      category.imageFallbacks && category.imageFallbacks.length > 0
+                        ? encodeFallbacks(category.imageFallbacks)
+                        : undefined
+                    }
+                    className="w-full h-48 object-cover"
+                    onError={(event) => {
+                      const nextSrc = shiftFallback(event.currentTarget);
+                      if (nextSrc) {
+                        event.currentTarget.src = nextSrc;
+                      } else {
+                        event.currentTarget.onerror = null;
+                        event.currentTarget.src = DEFAULT_IMAGE;
+                      }
+                    }}
+                  />
+                  <div className="p-4">
+                    <h3 className="text-lg font-semibold text-gray-800">{category.name}</h3>
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
         )}

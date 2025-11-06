@@ -1,10 +1,13 @@
 import React from 'react';
 import type { Category } from '../types';
+import { encodeFallbacks, shiftFallback } from '../utils/mediaUrl';
 
 interface CategoryCardProps {
   category: Category;
   onCategoryClick: (category: string) => void;
 }
+
+const FALLBACK_IMAGE = 'https://picsum.photos/seed/fjkm-category/600/400';
 
 const CategoryCard: React.FC<CategoryCardProps> = ({ category, onCategoryClick }) => {
   return (
@@ -19,12 +22,25 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category, onCategoryClick }
         <img 
           src={category.imageUrl} 
           alt={category.name}
+          data-fallbacks={
+            category.imageFallbacks && category.imageFallbacks.length > 0
+              ? encodeFallbacks(category.imageFallbacks)
+              : undefined
+          }
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+          onError={(event) => {
+            const nextSrc = shiftFallback(event.currentTarget);
+            if (nextSrc) {
+              event.currentTarget.src = nextSrc;
+            } else {
+              event.currentTarget.onerror = null;
+              event.currentTarget.src = FALLBACK_IMAGE;
+            }
+          }}
         />
       </div>
       <div className="p-6 text-center">
         <h3 className="text-xl font-bold text-gray-800 mb-2">{category.name}</h3>
-        <p className="text-gray-600 text-sm h-10">{category.description}</p>
       </div>
     </div>
   );

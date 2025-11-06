@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import type { Category } from '../types';
 import CategoryCard from './CategoryCard';
+import { API_BASE_URL } from '../utils/apiConfig';
+import { normalizeMediaValue } from '../utils/mediaUrl';
 
 interface AllCategoriesPageProps {
   onCategoryClick: (category: string) => void;
 }
+
+const DEFAULT_IMAGE = 'https://picsum.photos/seed/fjkm-category/600/400';
 
 const AllCategoriesPage: React.FC<AllCategoriesPageProps> = ({ onCategoryClick }) => {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -14,25 +18,42 @@ const AllCategoriesPage: React.FC<AllCategoriesPageProps> = ({ onCategoryClick }
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await fetch('https://91eb35f24335.ngrok-free.app/api/categories');
+        const response = await fetch(`${API_BASE_URL}/api/categories`, {
+          headers: {
+            Accept: 'application/json',
+            'ngrok-skip-browser-warning': '1',
+          },
+        });
         if (!response.ok) {
           const mockCategories: Category[] = [
-            { name: "FJKM Anosivavaka", imageUrl: "https://picsum.photos/seed/event/600/400", description: "Join our thrilling events and challenges across the globe." },
-            { name: "Destination", imageUrl: "https://picsum.photos/seed/destination/600/400", description: "Discover breathtaking new places and hidden gems." },
-            { name: "Guides", imageUrl: "https://picsum.photos/seed/guides/600/400", description: "Expert tips and comprehensive guides for your next trip." },
-            { name: "Equipment", imageUrl: "https://picsum.photos/seed/equipment/600/400", description: "Reviews and recommendations on the best gear for your FJKM Anosivavaka." },
-            { name: "Food & Travel", imageUrl: "https://picsum.photos/seed/food/600/400", description: "Explore global cuisines and culinary journeys." },
-            { name: "People", imageUrl: "https://picsum.photos/seed/people/600/400", description: "Inspiring stories from FJKM Anosivavaka around the world." },
-            { name: "Wildlife", imageUrl: "https://picsum.photos/seed/wildlife/600/400", description: "Encounters with the world's most fascinating creatures." },
-            { name: "Gear", imageUrl: "https://picsum.photos/seed/gear2/600/400", description: "In-depth reviews and guides on the latest FJKM Anosivavaka." },
+            { name: "FJKM Anosivavaka", imageUrl: "https://picsum.photos/seed/event/600/400", description: "Participez à nos événements et défis captivants aux quatre coins du monde." },
+            { name: "Destinations", imageUrl: "https://picsum.photos/seed/destination/600/400", description: "Découvrez des lieux à couper le souffle et des trésors cachés." },
+            { name: "Guides", imageUrl: "https://picsum.photos/seed/guides/600/400", description: "Des conseils d'experts et des guides complets pour préparer votre prochain voyage." },
+            { name: "Équipement", imageUrl: "https://picsum.photos/seed/equipment/600/400", description: "Avis et recommandations sur le meilleur matériel pour vos aventures." },
+            { name: "Cuisine & Voyage", imageUrl: "https://picsum.photos/seed/food/600/400", description: "Explorez les cuisines du monde et des expériences culinaires inoubliables." },
+            { name: "Rencontres", imageUrl: "https://picsum.photos/seed/people/600/400", description: "Des histoires inspirantes de la communauté FJKM Anosivavaka." },
+            { name: "Faune", imageUrl: "https://picsum.photos/seed/wildlife/600/400", description: "Rencontres avec les créatures les plus fascinantes de la planète." },
+            { name: "Matériel", imageUrl: "https://picsum.photos/seed/gear2/600/400", description: "Analyses détaillées et guides sur les dernières innovations d'aventure." },
           ];
           setCategories(mockCategories);
           return;
         }
-        const data: Category[] = await response.json();
-        setCategories(data);
+        const payload = await response.json();
+        const normalized = Array.isArray(payload)
+          ? payload.map((item: Category) => {
+              const { primary, fallbacks } = normalizeMediaValue(item?.imageUrl ?? '', {
+                fallback: DEFAULT_IMAGE,
+              });
+              return {
+                ...item,
+                imageUrl: primary,
+                imageFallbacks: fallbacks,
+              };
+            })
+          : [];
+        setCategories(normalized);
       } catch (err) {
-        setError("Failed to load categories.");
+        setError('Impossible de charger les catégories.');
         console.error(err);
       } finally {
         setLoading(false);
@@ -46,14 +67,14 @@ const AllCategoriesPage: React.FC<AllCategoriesPageProps> = ({ onCategoryClick }
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
             <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 tracking-tight">
-                All Categories
+                Toutes les catégories
             </h1>
             <p className="mt-4 max-w-2xl mx-auto text-lg text-gray-600">
-                Dive into your next FJKM Anosivavaka by exploring our wide range of topics and stories.
+                Préparez votre prochaine aventure FJKM Anosivavaka en explorant nos rubriques et nos récits variés.
             </p>
         </div>
 
-        {loading && <div className="text-center"><p>Loading categories...</p></div>}
+        {loading && <div className="text-center"><p>Chargement des catégories...</p></div>}
         {error && <div className="text-center text-red-600"><p>{error}</p></div>}
         {!loading && !error && (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">

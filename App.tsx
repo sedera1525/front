@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { Suspense, lazy, useCallback } from 'react';
 import Header from './components/Header';
 import HeroSection from './components/HeroSection';
 import FeaturedStories from './components/FeaturedStories';
@@ -12,10 +12,14 @@ import GalleryPage from './components/GalleryPage';
 import ContactPage from './components/ContactPage';
 import AllCategoriesPage from './components/AllCategoriesPage';
 import Ticker from './components/Ticker';
+import AccessGate from './components/AccessGate';
+import AccessControlPage from './components/AccessControlPage';
 import { Routes, Route, useNavigate, Navigate, useParams, useLocation } from 'react-router-dom';
 import type { StoryNavigationTarget } from './types';
 
-type NavPage = 'home' | 'gallery' | 'contact';
+const VideoPage = lazy(() => import('./components/VideoPage'));
+
+type NavPage = 'home' | 'gallery' | 'videos' | 'contact';
 
 const App: React.FC = () => {
   const navigate = useNavigate();
@@ -40,6 +44,9 @@ const App: React.FC = () => {
       case 'gallery':
         navigate('/gallery');
         break;
+      case 'videos':
+        navigate('/videos');
+        break;
       case 'contact':
         navigate('/contact');
         break;
@@ -50,16 +57,10 @@ const App: React.FC = () => {
     window.scrollTo(0, 0);
   }, [navigate]);
 
-  const tickerText = useMemo(
-    () =>
-      "LATEST: A new FJKM Anosivavaka awaits in the Amazon rainforest... | DISCOVER: Top 5 destinations for summer 2025 revealed... | GEAR UP: Check out our latest reviews on ultralight tents...",
-    []
-  );
-
   const HomePage = () => (
     <>
       <HeroSection />
-      <Ticker text={tickerText} />
+      <Ticker />
       <FeaturedStories onCategoryClick={handleCategoryClick} />
       <PresidentMessage />
       <LatestSection onStoryClick={handleStoryClick} onCategoryClick={handleShowAllCategories} />
@@ -79,7 +80,7 @@ const App: React.FC = () => {
     return (
       <>
         <HeroSection />
-        <Ticker text={tickerText} />
+        <Ticker />
         <section className="bg-white py-16 sm:py-24">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
@@ -105,7 +106,7 @@ const App: React.FC = () => {
     return (
       <>
         <HeroSection />
-        <Ticker text={tickerText} />
+        <Ticker />
         <CategoryPage
           category={decodedCategory}
           onStoryClick={handleStoryClick}
@@ -118,27 +119,39 @@ const App: React.FC = () => {
   const AllCategoriesRoute = () => (
     <>
       <HeroSection />
-      <Ticker text={tickerText} />
+      <Ticker />
       <AllCategoriesPage onCategoryClick={handleCategoryClick} />
     </>
   );
 
   return (
-    <div className="bg-gray-100 min-h-screen font-sans">
-      <Header onNavClick={handleNavClick} />
-      <main>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/gallery" element={<GalleryPage />} />
-          <Route path="/contact" element={<ContactPage />} />
-          <Route path="/categories" element={<AllCategoriesRoute />} />
-          <Route path="/category/:categoryName" element={<CategoryRoute />} />
-          <Route path="/article/:slug" element={<ArticleRoute />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </main>
-      <Footer />
-    </div>
+    <AccessGate>
+      <div className="bg-gray-100 min-h-screen font-sans">
+        <Header onNavClick={handleNavClick} />
+        <main>
+          <Suspense
+            fallback={
+              <div className="py-20 text-center text-gray-600">
+                Chargement du contenu...
+              </div>
+            }
+          >
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/gallery" element={<GalleryPage />} />
+              <Route path="/videos" element={<VideoPage />} />
+              <Route path="/contact" element={<ContactPage />} />
+              <Route path="/categories" element={<AllCategoriesRoute />} />
+              <Route path="/category/:categoryName" element={<CategoryRoute />} />
+              <Route path="/article/:slug" element={<ArticleRoute />} />
+              <Route path="/access-admin" element={<AccessControlPage />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </Suspense>
+        </main>
+        <Footer />
+      </div>
+    </AccessGate>
   );
 };
 

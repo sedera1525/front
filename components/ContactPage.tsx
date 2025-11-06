@@ -23,7 +23,7 @@ const ContactPage: React.FC = () => {
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-800 text-lg">Adresse</h3>
-                  <p className="text-gray-600">123 FJKM Anosivavaka Lane, Explore City, World</p>
+                  <p className="text-gray-600">123 rue FJKM Anosivavaka, Quartier Explore, Monde</p>
                 </div>
               </div>
               <div className="flex items-start space-x-4">
@@ -41,7 +41,7 @@ const ContactPage: React.FC = () => {
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-800 text-lg">Email</h3>
-                  <p className="text-gray-600">contact@FJKM Anosivavaka.com</p>
+                  <p className="text-gray-600">contact@fjkmanosivavaka.com</p>
                 </div>
               </div>
             </div>
@@ -51,7 +51,7 @@ const ContactPage: React.FC = () => {
           <div className="flex items-center justify-center">
             <img 
               src="https://picsum.photos/seed/contact-image/800/1000" 
-              alt="A kayaker paddling in a serene lake"
+              alt="Un kayakiste pagayant sur un lac paisible"
               className="rounded-lg shadow-xl w-full h-full object-cover max-h-[600px]"
             />
           </div>

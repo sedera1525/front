@@ -11,7 +11,7 @@ interface ArticleDetailProps {
 
 const ARTICLE_ENDPOINT = (id: number) => `${API_BASE_URL}/api/article/${id}`;
 const ARTICLES_ENDPOINT = `${API_BASE_URL}/api/articles`;
-const DEFAULT_IMAGE = 'https://picsum.photos/1200/600?image=1043';
+const DEFAULT_IMAGE = 'https://img.freepik.com/free-vector/film-strip-with-blue-background_1017-29914.jpg?t=st=1731708207~exp=1731711807~hmac=6bce3a20112a2d1064573d4032c042a9ec3841e46431761279bae7664d763529&w=1380';
 const DEFAULT_AUTHOR_AVATAR = 'https://picsum.photos/seed/fjkm-author/100/100';
 
 type ApiArticlePayload = {
@@ -35,12 +35,12 @@ type ApiArticlePayload = {
 
 const toArticle = (payload: unknown, requestedId: number, fallbackSlug: string): Article => {
   if (payload === null || typeof payload !== 'object') {
-    throw new Error('Invalid article payload.');
+    throw new Error('Réponse d\'article invalide.');
   }
 
   const { data } = payload as ApiArticlePayload;
   if (!data) {
-    throw new Error('Missing article data.');
+    throw new Error('Données d\'article introuvables.');
   }
 
   const id = data.id ?? requestedId;
@@ -85,22 +85,22 @@ const toArticle = (payload: unknown, requestedId: number, fallbackSlug: string):
 
 const DEFAULT_ARTICLE: Article = {
   id: 0,
-  title: 'Discovering the Hidden Gems of the Scottish Highlands',
-  slug: slugify('Discovering the Hidden Gems of the Scottish Highlands'),
+  title: 'À la découverte des trésors cachés des Highlands écossais',
+  slug: slugify('À la découverte des trésors cachés des Highlands écossais'),
   imageUrl: DEFAULT_IMAGE,
   imageFallbacks: [],
-  category: 'Destination',
+  category: 'Destinations',
   categoryColor: 'bg-red-500',
   author: { name: 'Jane Cooper', avatarUrl: DEFAULT_AUTHOR_AVATAR, avatarFallbacks: [] },
-  date: 'October 26, 2024',
+  date: '26 octobre 2024',
   readTime: '8 min',
   excerpt:
-    'The Scottish Highlands are a rugged, mountainous region of Scotland, known for their stunning landscapes, historic castles, and rich cultural heritage.',
+    'Les Highlands d\'Écosse forment une région montagneuse et sauvage, réputée pour ses paysages majestueux, ses châteaux historiques et sa culture vibrante.',
   content: `
-    <p>The Scottish Highlands are a rugged, mountainous region of Scotland, known for their stunning landscapes, historic castles, and rich cultural heritage. This sparsely populated area is a paradise for outdoor enthusiasts, offering everything from hiking and climbing to kayaking and wildlife watching.</p>
-    <p class="my-4">Our journey began in Inverness, the cultural capital of the Highlands. From there, we ventured west, towards the iconic Loch Ness. While we didn't spot the legendary monster, the sheer beauty of the loch, surrounded by rolling hills and ancient forests, was a sight to behold.</p>
+    <p>Les Highlands d'Écosse forment une région montagneuse et sauvage, réputée pour ses paysages majestueux, ses châteaux historiques et sa culture vibrante. Ce territoire peu peuplé est un paradis pour les amoureux de nature, qui peuvent y pratiquer randonnée, escalade, kayak ou encore observation de la faune.</p>
+    <p class="my-4">Notre voyage a débuté à Inverness, capitale culturelle des Highlands. De là, nous avons pris la route vers l'ouest, en direction de l'incontournable Loch Ness. Même si la créature légendaire est restée discrète, la beauté du loch, entouré de collines verdoyantes et de forêts anciennes, nous a laissés sans voix.</p>
     <blockquote class="border-l-4 border-blue-500 pl-4 my-6 italic text-gray-600">
-      "The Highlands are not just a place, but a feeling. A sense of wildness, freedom, and timelessness that stays with you long after you've left."
+      "Les Highlands ne sont pas seulement un lieu, mais un sentiment. Une impression de liberté et de grandeur qui vous accompagne bien après le voyage."
     </blockquote>
   `,
 };
@@ -126,12 +126,12 @@ const ArticleDetail: React.FC<ArticleDetailProps> = ({ slug, initialArticleId })
           });
 
           if (!listResponse.ok) {
-            throw new Error(`Unexpected status ${listResponse.status} while resolving slug`);
+            throw new Error(`Statut inattendu ${listResponse.status} lors de la résolution du slug`);
           }
 
           const listPayload = await listResponse.json();
           if (!Array.isArray(listPayload)) {
-            throw new Error('Invalid article collection response.');
+            throw new Error('Réponse de liste d\'articles invalide.');
           }
 
           const fallbackSlug = slugify(slug);
@@ -165,7 +165,7 @@ const ArticleDetail: React.FC<ArticleDetailProps> = ({ slug, initialArticleId })
         });
 
         if (!response.ok) {
-          throw new Error(`Unexpected status ${response.status}`);
+          throw new Error(`Statut inattendu ${response.status}`);
         }
 
         const payload = await response.json();
@@ -183,7 +183,7 @@ const ArticleDetail: React.FC<ArticleDetailProps> = ({ slug, initialArticleId })
     fetchArticle();
   }, [slug, initialArticleId]);
 
-  if (loading) return <div className="p-4 text-center bg-white rounded-lg shadow-md">Loading article...</div>;
+  if (loading) return <div className="p-4 text-center bg-white rounded-lg shadow-md">Chargement de l'article...</div>;
   if (error) return <div className="p-4 text-center text-red-600 bg-white rounded-lg shadow-md">{error}</div>;
   if (!article) return null;
 
