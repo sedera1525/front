@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import type { Article } from '../types';
 import slugify from '../utils/slugify';
+import { API_BASE_URL } from '../utils/apiConfig';
+import { encodeFallbacks, normalizeMediaValue, shiftFallback } from '../utils/mediaUrl';
 
 interface ArticleDetailProps {
   slug: string;
   initialArticleId?: number;
 }
 
-const API_BASE_URL = 'https://91eb35f24335.ngrok-free.app';
 const ARTICLE_ENDPOINT = (id: number) => `${API_BASE_URL}/api/article/${id}`;
 const ARTICLES_ENDPOINT = `${API_BASE_URL}/api/articles`;
 const DEFAULT_IMAGE = 'https://picsum.photos/1200/600?image=1043';
@@ -30,41 +31,6 @@ type ApiArticlePayload = {
     } | null;
     readTime?: string | null;
   } | null;
-};
-
-const normalizeMediaUrl = (raw?: string | null, fallback: string = DEFAULT_IMAGE): string => {
-  const value = raw?.trim();
-  if (!value) {
-    return fallback;
-  }
-
-  if (/^https?:\/\//i.test(value)) {
-    try {
-      const parsed = new URL(value);
-      const base = new URL(API_BASE_URL);
-
-      if (parsed.hostname === 'localhost') {
-        parsed.protocol = base.protocol;
-        parsed.hostname = base.hostname;
-        parsed.port = base.port;
-      }
-
-      if (!parsed.pathname.startsWith('/storage/')) {
-        parsed.pathname = `/storage/${parsed.pathname.replace(/^\/+/, '')}`;
-      }
-
-      parsed.searchParams.set('ngrok-skip-browser-warning', '1');
-
-      return parsed.toString();
-    } catch (error) {
-      console.error('Failed to normalize media URL', error);
-      return fallback;
-    }
-  }
-
-  const cleaned = value.replace(/^\/+/, '');
-  const prefixed = cleaned.startsWith('storage/') ? cleaned : `storage/${cleaned}`;
-  return `${API_BASE_URL}/${prefixed}?ngrok-skip-browser-warning=1`;
 };
 
 const toArticle = (payload: unknown, requestedId: number, fallbackSlug: string): Article => {
@@ -92,17 +58,22 @@ const toArticle = (payload: unknown, requestedId: number, fallbackSlug: string):
       : '<p>Aucun contenu disponible pour cet article pour le moment.</p>';
 
   const authorName = data.author?.name?.trim() || 'Équipe FJKM Anosivavaka';
-  const authorAvatar = normalizeMediaUrl(data.author?.avatarUrl, DEFAULT_AUTHOR_AVATAR);
+  const articleMedia = normalizeMediaValue(data.imageUrl ?? '', { fallback: DEFAULT_IMAGE });
+  const authorMedia = normalizeMediaValue(data.author?.avatarUrl ?? '', {
+    fallback: DEFAULT_AUTHOR_AVATAR,
+  });
 
   return {
     id,
     title,
-    imageUrl: normalizeMediaUrl(data.imageUrl, DEFAULT_IMAGE),
+    imageUrl: articleMedia.primary,
+    imageFallbacks: articleMedia.fallbacks,
     category,
     categoryColor,
     author: {
       name: authorName,
-      avatarUrl: authorAvatar,
+      avatarUrl: authorMedia.primary,
+      avatarFallbacks: authorMedia.fallbacks,
     },
     date: data.date?.trim() || undefined,
     readTime,
@@ -117,9 +88,10 @@ const DEFAULT_ARTICLE: Article = {
   title: 'Discovering the Hidden Gems of the Scottish Highlands',
   slug: slugify('Discovering the Hidden Gems of the Scottish Highlands'),
   imageUrl: DEFAULT_IMAGE,
+  imageFallbacks: [],
   category: 'Destination',
   categoryColor: 'bg-red-500',
-  author: { name: 'Jane Cooper', avatarUrl: DEFAULT_AUTHOR_AVATAR },
+  author: { name: 'Jane Cooper', avatarUrl: DEFAULT_AUTHOR_AVATAR, avatarFallbacks: [] },
   date: 'October 26, 2024',
   readTime: '8 min',
   excerpt:
@@ -222,13 +194,49 @@ const ArticleDetail: React.FC<ArticleDetailProps> = ({ slug, initialArticleId })
       </span>
       <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 leading-tight mb-4">{article.title}</h1>
       <div className="flex items-center space-x-4 mb-6 border-b border-t border-gray-200 py-4">
-        <img src={article.author.avatarUrl} alt={article.author.name} className="w-12 h-12 rounded-full object-cover" />
+        <img
+          src={article.author.avatarUrl}
+          alt={article.author.name}
+          data-fallbacks={
+            article.author.avatarFallbacks && article.author.avatarFallbacks.length > 0
+              ? encodeFallbacks(article.author.avatarFallbacks)
+              : undefined
+          }
+          className="w-12 h-12 rounded-full object-cover"
+          onError={(event) => {
+            const nextSrc = shiftFallback(event.currentTarget);
+            if (nextSrc) {
+              event.currentTarget.src = nextSrc;
+            } else {
+              event.currentTarget.onerror = null;
+              event.currentTarget.src = DEFAULT_AUTHOR_AVATAR;
+            }
+          }}
+        />
         <div>
           <p className="font-semibold text-gray-800">{article.author.name}</p>
           <p className="text-sm text-gray-500">{article.date}</p>
         </div>
       </div>
-      <img src={article.imageUrl} alt={article.title} className="w-full rounded-lg shadow-lg mb-8" />
+      <img
+        src={article.imageUrl}
+        alt={article.title}
+        data-fallbacks={
+          article.imageFallbacks && article.imageFallbacks.length > 0
+            ? encodeFallbacks(article.imageFallbacks)
+            : undefined
+        }
+        className="w-full rounded-lg shadow-lg mb-8"
+        onError={(event) => {
+          const nextSrc = shiftFallback(event.currentTarget);
+          if (nextSrc) {
+            event.currentTarget.src = nextSrc;
+          } else {
+            event.currentTarget.onerror = null;
+            event.currentTarget.src = DEFAULT_IMAGE;
+          }
+        }}
+      />
       <div className="prose prose-lg max-w-none text-gray-700" dangerouslySetInnerHTML={{ __html: article.content }}>
       </div>
     </div>

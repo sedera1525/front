@@ -3,15 +3,17 @@ import type { Story, StoryNavigationTarget } from '../types';
 import StoryCard from './StoryCard'; // Changed from ArticleCard
 import PopularNewsSidebar from './PopularNewsSidebar';
 import slugify from '../utils/slugify';
+import { API_BASE_URL } from '../utils/apiConfig';
+import { normalizeMediaValue } from '../utils/mediaUrl';
 
 interface LatestSectionProps {
   onStoryClick: (target: StoryNavigationTarget) => void;
   onCategoryClick: (category: string) => void;
 }
 
-const API_BASE_URL = 'https://91eb35f24335.ngrok-free.app';
 const ARTICLES_ENDPOINT = `${API_BASE_URL}/api/articles`;
 const DEFAULT_IMAGE = 'https://picsum.photos/seed/fjkm-latest/600/400';
+const DEFAULT_AVATAR = 'https://picsum.photos/seed/fjkm-author/100/100';
 
 type ApiArticle = {
   id: number;
@@ -38,14 +40,16 @@ const normalizeArticles = (payload: unknown): Story[] => {
     const article = item as ApiArticle;
 
     const rawImagePath = article.imageUrl?.trim() ?? '';
-    const hasAbsoluteImage = /^https?:\/\//i.test(rawImagePath);
-    const normalizedImage = rawImagePath
-      ? hasAbsoluteImage
-        ? rawImagePath
-        : `${API_BASE_URL}/storage/${rawImagePath.replace(/^\/+/, '')}`
-      : DEFAULT_IMAGE;
+    const { primary: normalizedImage, fallbacks: imageFallbacks } = normalizeMediaValue(
+      rawImagePath,
+      { fallback: DEFAULT_IMAGE },
+    );
 
     const normalizedAuthor = article.author ?? undefined;
+    const authorMedia = normalizeMediaValue(normalizedAuthor?.avatarUrl ?? '', {
+      fallback: DEFAULT_AVATAR,
+    });
+
     const derivedSlug = article.slug?.trim()
       ? slugify(article.slug)
       : article.title
@@ -57,13 +61,15 @@ const normalizeArticles = (payload: unknown): Story[] => {
       title: article.title,
       slug: derivedSlug,
       imageUrl: normalizedImage,
+      imageFallbacks,
       category: article.category,
       categoryColor: article.categoryColor ?? 'bg-gray-500',
       excerpt: article.excerpt ?? undefined,
       author: normalizedAuthor
         ? {
             name: normalizedAuthor.name,
-            avatarUrl: normalizedAuthor.avatarUrl ?? undefined,
+            avatarUrl: authorMedia.primary,
+            avatarFallbacks: authorMedia.fallbacks,
           }
         : undefined,
       date: article.date ?? undefined,

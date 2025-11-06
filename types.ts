@@ -5,12 +5,14 @@ export interface Story {
   title: string;
   slug?: string;
   imageUrl: string;
+  imageFallbacks?: string[];
   category: string;
   categoryColor: string;
   excerpt?: string;
   author?: {
     name: string;
     avatarUrl?: string;
+    avatarFallbacks?: string[];
   };
   date?: string;
   readTime?: string;
@@ -26,6 +28,7 @@ export interface TrendingStory {
   title: string;
   slug?: string;
   imageUrl: string;
+  imageFallbacks?: string[];
   date: string;
   comments: number;
   excerpt?: string;
@@ -50,6 +53,7 @@ export interface President {
   quote: string;
   message: string;
   imageUrl: string;
+  imageFallbacks?: string[];
 }
 
 export interface Article extends Story {
@@ -57,6 +61,7 @@ export interface Article extends Story {
   author: {
     name: string;
     avatarUrl: string;
+    avatarFallbacks?: string[];
   };
   date: string;
 }
@@ -64,6 +69,7 @@ export interface Article extends Story {
 export interface GalleryImage {
   id: number;
   imageUrl: string;
+  imageFallbacks?: string[];
   title: string;
   category: string;
 }
@@ -71,5 +77,6 @@ export interface GalleryImage {
 export interface Category {
   name: string;
   imageUrl: string;
+  imageFallbacks?: string[];
   description: string;
 }

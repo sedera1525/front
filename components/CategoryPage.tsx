@@ -2,12 +2,77 @@ import React, { useState, useEffect } from 'react';
 import type { Story, StoryNavigationTarget } from '../types';
 import LazyArticleCard from './LazyArticleCard';
 import slugify from '../utils/slugify';
+import { API_BASE_URL } from '../utils/apiConfig';
+import { normalizeMediaValue } from '../utils/mediaUrl';
 
 interface CategoryPageProps {
   category: string;
   onStoryClick: (target: StoryNavigationTarget) => void;
   onCategoryClick: (category: string) => void;
 }
+
+const DEFAULT_IMAGE = 'https://picsum.photos/seed/fjkm-category-story/600/400';
+const DEFAULT_AVATAR = 'https://picsum.photos/seed/fjkm-author/80/80';
+
+const mapArticles = (payload: unknown): Story[] => {
+  if (!Array.isArray(payload)) {
+    throw new Error('Invalid category articles payload');
+  }
+
+  return payload.map((item, index) => {
+    const article = item as Partial<Story> & {
+      id?: number;
+      slug?: string | null;
+      imageUrl?: string | null;
+      title?: string | null;
+      category?: string | null;
+      categoryColor?: string | null;
+      excerpt?: string | null;
+      author?: {
+        name?: string | null;
+        avatarUrl?: string | null;
+      } | null;
+      date?: string | null;
+      readTime?: string | null;
+    };
+
+    const id = typeof article.id === 'number' ? article.id : index;
+    const rawImagePath = article.imageUrl ?? '';
+    const { primary: imageUrl, fallbacks: imageFallbacks } = normalizeMediaValue(rawImagePath, {
+      fallback: DEFAULT_IMAGE,
+    });
+
+    const rawAuthor = article.author ?? undefined;
+    const authorMedia = normalizeMediaValue(rawAuthor?.avatarUrl ?? '', {
+      fallback: DEFAULT_AVATAR,
+    });
+
+    const resolvedTitle = article.title ?? `Article ${id}`;
+    const derivedSlug = article.slug?.trim()
+      ? slugify(article.slug)
+      : slugify(resolvedTitle);
+
+    return {
+      id,
+      title: resolvedTitle,
+      slug: derivedSlug,
+      imageUrl,
+      imageFallbacks,
+      category: article.category ?? 'Actualités',
+      categoryColor: article.categoryColor ?? 'bg-blue-600',
+      excerpt: article.excerpt ?? undefined,
+      author: rawAuthor
+        ? {
+            name: rawAuthor.name ?? 'Rédaction FJKM',
+            avatarUrl: authorMedia.primary,
+            avatarFallbacks: authorMedia.fallbacks,
+          }
+        : undefined,
+      date: article.date ?? undefined,
+      readTime: article.readTime ?? undefined,
+    } satisfies Story;
+  });
+};
 
 const CategoryPage: React.FC<CategoryPageProps> = ({ category, onStoryClick, onCategoryClick }) => {
   const [articles, setArticles] = useState<Story[]>([]);
@@ -18,7 +83,15 @@ const CategoryPage: React.FC<CategoryPageProps> = ({ category, onStoryClick, onC
     setLoading(true);
     const fetchArticles = async () => {
       try {
-        const response = await fetch(`https://91eb35f24335.ngrok-free.app/api/articles?category=${encodeURIComponent(category)}`);
+        const response = await fetch(
+          `${API_BASE_URL}/api/articles?category=${encodeURIComponent(category)}`,
+          {
+            headers: {
+              Accept: 'application/json',
+              'ngrok-skip-browser-warning': '1',
+            },
+          }
+        );
         if (!response.ok) {
           const mockArticles: Story[] = [
              // Destination
@@ -56,11 +129,8 @@ const CategoryPage: React.FC<CategoryPageProps> = ({ category, onStoryClick, onC
           setArticles(mockArticles);
           return;
         }
-        const data: Story[] = await response.json();
-        const normalized = data.map(article => ({
-          ...article,
-          slug: article.slug ?? slugify(`${article.title}-${article.id}`),
-        }));
+        const payload = await response.json();
+        const normalized = mapArticles(payload);
         setArticles(normalized);
       } catch (err) {
         setError(`Failed to load articles for category: ${category}.`);
